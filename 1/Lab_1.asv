@@ -70,11 +70,6 @@ kgr = margin(K1);
 % linia 45 deg
 % plot([-1 0], [1 0] *1) -> y = -x
 
-%  można narywować dla konkretnego k, rlocus(K1, 'k', 2); -> czarne k=2
-
-%  RR = rlocus(K)
-%  można z RR policzyć stopień oscylacyjności
-
 %%
 
 % Zapas amplitudy i fazy
@@ -104,20 +99,16 @@ hold off;
 % Wskaźnik nadążania oraz regulacji
 
 % Wskaźnik nadążania M(\omega) = G
-% Wskaźnik regulacji  q(\omega) = Ge
-% Jak zakłócenie w ukł zam. jest tłumiona w stosunku do otw.
-
-% Możemy w properties wykresu zmieniać opcje takie np. jak skala 
+% Wskaźnik regulacji  q
+% Jak zakłócenie w ukł zam. jest tłumiona 
 
 figure(8);
 bodemag(G1);
-
 hold on
 bodemag(E1);
 grid on;
 hold off;
 
 
-% do simulinka: sim('filename.mdl') -> możemy wywoływać w pętli ze
-% zmieniąjącymi się parameterami
+
 
