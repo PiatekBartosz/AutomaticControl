@@ -21,7 +21,7 @@ h2i = 0.1*h20;
 
 qdiff = sqrt(h20*1.1)*c2-qwe;
 
-% Stałe czasowe
+%% Stałe czasowe
 T1 = 2*pi*sqrt(h10)*R1^2/c1;
 T2 = 2*a2*b2*h20^(5/2)/(H2^2*c2);
 T3 = 0.3*min(T1, T2);
@@ -30,31 +30,31 @@ Tmax = max(T1, T2);
 % Wzmocnienie
 k = 2*sqrt(h20)/c2;
 
-% Wzmocnienie regulatora
+%% Wzmocnienie regulatora
 % kr = 2.4; % - M_max
 % kr = 3.9449; % - Zapas fazy
 kr = 5.2928; % - Zapas amplitudy
 
-% Transmitancja przyrostowa
+%% Transmitancja przyrostowa
 K = k/((s*T1+1)*(s*T2+1));
 [L, M] = tfdata(K, 'v');
 
-% Transmitancja układu otwartego
+%% Transmitancja układu otwartego
 Ko = kr/(s*T3+1)*K;
 [ZA, ZF] = margin(Ko);
 
-% Kryterium M_max
+%% Kryterium M_max
 figure(1);
 bodeplot((Ko/(1+Ko)), 'b');
 grid on
 hold on
 
-% Kryterium zapasu fazy
+%% Kryterium zapasu fazy
 figure(2);
 h1 = nyquistplot(Ko);
 setoptions(h1, 'ShowFullContour', 'off', 'MagUnits', 'abs', 'PhaseUnits', 'deg');
 
-% Wykres uchybu w stanie ustalonym
+%% Wykres uchybu w stanie ustalonym
 figure(3);
 plot(e, 'g', 'LineWidth', 1.2);
 title('Wykres uchybu w stanie ustalonym');
@@ -62,13 +62,13 @@ xlabel('t, s');
 ylabel('e(t)');
 grid on;
 
-% Zera i bieguny układu zamkniętego
+%% Zera i bieguny układu zamkniętego
 G = Ko/(1+Ko);
 figure(4);
 pzmap(G, 'g');
 hold on;
 
-% Wykres h2 oraz h2_zlinearyzowane
+%% Wykres h2 oraz h2_zlinearyzowane
 figure(5);
 plot(h2, 'b', 'LineWidth', 1.2);
 grid on;
