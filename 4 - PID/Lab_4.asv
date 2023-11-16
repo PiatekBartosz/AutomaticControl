@@ -1,0 +1,178 @@
+clear all
+
+%%%%%%%%%%%% Walce %%%%%%%%%%%%%
+R1 = 1.12838;
+H1 = 5;
+c1 = 4.3589;
+
+%%%%%%%%%%%% Ostroslup %%%%%%%%%%%%%
+a2 = 3.59153;
+b2 = 7.79612;
+H2 = 19;
+c2 = 3.08221;
+
+%%%%%%%%%%%% Charakterystyka statyczna %%%%%%%%%%%%%
+qwe = 0.5*H2;
+h10 = (qwe/c1)^2;
+h20 = (qwe/c2)^2;
+h1i = 0;
+h2i = 0.1*h20;
+qdiff = sqrt(h20*1.1)*c2-qwe;
+
+%%%%%%%%%%%% Parametry oraz transmitancje %%%%%%%%%%%%%
+k = 2*sqrt(h20)/c2;
+T1 = 2*pi*sqrt(h10)*R1^2/c1;
+T2 = 2*a2*b2*h20^(5/2)/(H2^2*c2);
+T3 = 0.5*min(T1, T2);
+
+s = tf('s');
+Kob=k/((1+T1*s)*(1+T2*s)*(1+T3*s));
+
+kgr = 7.714265;
+Tosc = 97.8 - 82.9;
+
+Ko = kgr*Kob;
+G = Ko/(1+Ko);
+% step(G, [0:0.001:100]);
+G = Kob/(1+Kob);
+
+%%
+%%%%%%%%%%%% Metoda Zieglera-Nicholsa %%%%%%%%%%%%%
+kr_P = 0.5*kgr;
+kr_PI = 0.45*kgr;
+kr_PID = 0.6*kgr;
+
+T1_PI = Tosc/1.2;
+T1_PID = Tosc/2;
+TD_PID = Tosc/8;
+T
+
+K_P = kr_P;
+K_PI = kr_PI*(1+1/(T1_PI*s));
+K_PID = kr_PID*(1+1/(T1_PID*s)+TD_PID*s/(1+TfPI));
+
+% Regulator P
+Ko_P = K_P*Kob;
+G_P = minreal(Ko_P/(Ko_P+1));
+% figure;
+% step(G_P);
+stpinf = stepinfo(G_P);
+eust_P = 1 - dcgain(G_P);
+przeregulowanie_procent_P = stpinf.Overshoot;
+czas_narastania_P = stpinf.RiseTime;
+tr_P = stepinfo(G_P, 'SettlingTimeTreshold', 0.02).TransientTime;
+[zapas_amp_P, zapas_fazy_P] = margin(Ko_P);
+
+eust_P
+przeregulowanie_procent_P
+czas_narastania_P
+tr_P
+zapas_amp_P
+zapas_fazy_P
+
+% Regulator PI
+Ko_PI = K_PI*Kob;
+G_PI = minreal(Ko_PI/(Ko_PI+1));
+% figure;
+% step(G_PI);
+stpinf = stepinfo(G_PI);
+eust_PI = 1 - dcgain(G_PI);
+przeregulowanie_procent_PI = stpinf.Overshoot;
+czas_narastania_PI = stpinf.RiseTime;
+tr_PI = stepinfo(G_PI, 'SettlingTimeTreshold', 0.02).TransientTime;
+[zapas_amp_PI, zapas_fazy_PI] = margin(Ko_PI);
+
+eust_PI
+przeregulowanie_procent_PI
+czas_narastania_PI
+tr_PI
+zapas_amp_PI
+zapas_fazy_PI
+
+% Regulator PID
+Ko_PID = K_PID*Kob;
+G_PID = minreal(Ko_PID/(Ko_PID+1));
+% figure;
+% step(G_PID);
+stpinf = stepinfo(G_PID);
+eust_PID = 1 - dcgain(G_PID);
+przeregulowanie_procent_PID = stpinf.Overshoot;
+czas_narastania_PID = stpinf.RiseTime;
+tr_PID = stepinfo(G_PID, 'SettlingTimeTreshold', 0.02).TransientTime;
+[zapas_amp_PID, zapas_fazy_PID] = margin(Ko_PID);
+
+eust_PID
+przeregulowanie_procent_PID
+czas_narastania_PID
+tr_PID
+zapas_amp_PID
+zapas_fazy_PID
+
+% Wykresy odpowiedzi skokowych regulatorów
+figure;
+step(G, G_P, G_PI, G_PID);
+set(findall(gcf,'type','line'),'linewidth',1.3);
+legend('Regulator k=1','Regulator P','Regulator PI','Regulator PID');
+grid on;
+
+%%
+%%%%%%%%%%%% Kryterium Zieglera-Nicholsa (QDR) %%%%%%%%%%%%%
+S_t1=stepinfo(Kob,'RiseTimeLimits',[0 0.632]);
+t1=S_t1.RiseTime;
+S_t2=stepinfo(Kob,'RiseTimeLimits',[0 0.283]);
+t2=S_t2.RiseTime;
+T=1.5*(t1-t2);
+T0=t1-T;
+
+kr_PI_QDR = 0.9*T/(k*T0);
+kr_PID_QDR = 1.2*T/(k*T0);
+
+T1_PI_QDR = 3.33*T0;
+T1_PID_QDR = 2*T0;
+
+TD_PID_QDR = 0.5*T0;
+
+K_PI_QDR = kr_PI_QDR*(1+1/(T1_PI_QDR*s));
+K_PID_QDR = kr_PID_QDR*(1+1/(T1_PID_QDR*s)+TD_PID_QDR*s);
+
+% Regulator PI
+Ko_PI_QDR = K_PI_QDR*Kob;
+G_PI_QDR = minreal(Ko_PI_QDR/(Ko_PI_QDR+1));
+% figure;
+% step(G_PI_QDR);
+stpinf = stepinfo(G_PI_QDR);
+eust_PI_QDR = 1 - dcgain(G_PI_QDR);
+przeregulowanie_procent_PI_QDR = stpinf.Overshoot;
+czas_narastania_PI_QDR = stpinf.RiseTime;
+tr_PI_QDR = stepinfo(G_PI_QDR, 'SettlingTimeTreshold', 0.02).TransientTime;
+[zapas_amp_PI_QDR, zapas_fazy_PI_QDR] = margin(Ko_PI_QDR);
+
+eust_PI_QDR
+przeregulowanie_procent_PI_QDR
+czas_narastania_PI_QDR
+tr_PI_QDR
+zapas_amp_PI_QDR
+zapas_fazy_PI_QDR
+
+% Regulator PID
+Ko_PID_QDR = K_PID_QDR*Kob;
+G_PID_QDR = minreal(Ko_PID_QDR/(Ko_PID_QDR+1));
+% figure;
+% step(G_PID_QDR);
+stpinf = stepinfo(G_PID_QDR);
+eust_PID_QDR = 1 - dcgain(G_PID_QDR);
+przeregulowanie_procent_PID_QDR = stpinf.Overshoot;
+czas_narastania_PID_QDR = stpinf.RiseTime;
+tr_PID_QDR = stepinfo(G_PID_QDR, 'SettlingTimeTreshold', 0.02).TransientTime;
+[zapas_amp_PID_QDR, zapas_fazy_PID_QDR] = margin(Ko_PID_QDR);
+
+eust_PID_QDR
+przeregulowanie_procent_PID_QDR
+czas_narastania_PID_QDR
+tr_PID_QDR
+zapas_amp_PID_QDR
+zapas_fazy_PID_QDR
+
+
+
+
